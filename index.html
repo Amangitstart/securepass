@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SecurePass: local password generator</title>
+<meta name="description" content="Generate strong random passwords on your device with entropy estimation. Nothing is stored or transmitted.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('securepass.theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><style>.s{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}</style></defs>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect class="s" x="9" y="9" width="11" height="11" rx="2"/><path class="s" d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path class="s" d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path class="s" d="M3 11l9-8 9 8M5 10v10h14V10"/></symbol>
+  <symbol id="i-gen" viewBox="0 0 24 24"><path class="s" d="M12 4v16M5 8l14 8M19 8L5 16"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle class="s" cx="12" cy="12" r="9"/><path class="s" d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle class="s" cx="12" cy="12" r="3"/><path class="s" d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path class="s" d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<header class="top">
+  <a class="brand" href="#/"><img src="assets/logo.svg" alt="" width="36" height="36"><span>SECUREPASS</span></a>
+  <span class="badge"><i></i>LOCAL</span>
+</header>
+
+<main id="app">
+  <!-- HOME -->
+  <section id="view-home" class="view">
+    <h1 class="h">FEATURED<span class="rule"></span></h1>
+    <a class="tool" href="#/generate" aria-label="Open the password generator">
+      <div class="tool-top"><span>SECURITY</span><span>FEATURED</span></div>
+      <div class="tool-art"><div class="demo" id="demo-pw"></div><div class="meter small" id="demo-meter"></div></div>
+      <div class="tool-body">
+        <div class="tool-title"><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-gen"/></svg></span><h2>PASSWORD GENERATOR</h2></div>
+        <p>Generate strong random passwords with entropy estimation.</p>
+        <span class="open">OPEN <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+      </div>
+    </a>
+    <h2 class="h2">RECENT ACTIVITY</h2>
+    <div class="card"><ul class="rows" id="home-recent"></ul><a class="link" href="#/recent">See all activity</a></div>
+    <h2 class="h2">SETTINGS</h2>
+    <div class="card"><p class="muted">Theme, history and privacy options.</p><a class="btn" href="#/settings">Open settings</a></div>
+  </section>
+
+  <!-- GENERATOR (single, multiple, customization) -->
+  <section id="view-generate" class="view">
+    <div class="card cyan">
+      <div class="pwrow">
+        <p class="pw" id="pw" aria-live="polite"></p>
+        <div class="actions">
+          <button class="icon" id="copy-main" type="button" aria-label="Copy password"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button>
+          <button class="btn" id="new" type="button"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>New</button>
+        </div>
+      </div>
+      <div class="meter" id="meter" role="img" aria-label="Password strength"></div>
+      <p id="verdict" class="verdict"></p>
+    </div>
+
+    <div class="card">
+      <div class="lenrow"><label for="len">Length</label><output id="lenout" for="len">20</output></div>
+      <input type="range" id="len" class="opt-range" min="8" max="128" value="20">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" class="opt" id="o-lower" checked><span>Lowercase a–z</span></label>
+        <label class="chk"><input type="checkbox" class="opt" id="o-upper" checked><span>Uppercase A–Z</span></label>
+        <label class="chk"><input type="checkbox" class="opt" id="o-digits" checked><span>Digits 0–9</span></label>
+        <label class="chk"><input type="checkbox" class="opt" id="o-symbols" checked><span>Symbols !@#$%^&amp;*</span></label>
+        <label class="chk wide"><input type="checkbox" class="opt" id="o-avoid"><span>Avoid look-alikes (Il1O0)</span></label>
+      </div>
+      <label for="count" class="lbl">How many</label>
+      <input type="number" id="count" inputmode="numeric" min="1" max="20" value="5">
+    </div>
+
+    <div class="card" id="morecard">
+      <div class="morehead"><span class="lab">MORE</span>
+        <button class="btn" id="copyall" type="button"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>Copy all</button></div>
+      <ul class="plist" id="list"></ul>
+    </div>
+
+    <div class="notes">
+      <p>Generated locally on your device using the Web Crypto API. Nothing is stored or transmitted.</p>
+      <p>Entropy is an estimate. It does not guarantee a password is safe against every attack, so use a unique password for each account.</p>
+    </div>
+  </section>
+
+  <!-- RECENT -->
+  <section id="view-recent" class="view">
+    <h1 class="h">RECENT<span class="rule"></span></h1>
+    <div class="card"><ul class="rows" id="recent-list"></ul>
+      <p class="muted small">Only the date, length and strength are kept on this device. Passwords are never saved.</p>
+      <button class="btn" id="clear-1" type="button">Clear history</button></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="view-settings" class="view">
+    <h1 class="h">SETTINGS<span class="rule"></span></h1>
+    <div class="card">
+      <h2 class="h3">Theme</h2>
+      <div class="seg"><button class="btn" id="th-light" type="button" aria-pressed="true">Light</button><button class="btn" id="th-dark" type="button" aria-pressed="false">Dark</button></div>
+    </div>
+    <div class="card">
+      <h2 class="h3">History</h2>
+      <p class="muted">Clears the saved list of dates, lengths and ratings.</p>
+      <button class="btn" id="clear-2" type="button">Clear history</button>
+    </div>
+    <div class="card">
+      <h2 class="h3">Privacy</h2>
+      <p>Everything runs in your browser. Passwords come from the Web Crypto API, are never logged, never stored and never sent anywhere. Only your theme and non-sensitive history are saved locally.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Main">
+  <a href="#/" data-v="home"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Home</a>
+  <a href="#/generate" data-v="generate"><svg class="ic" aria-hidden="true"><use href="#i-gen"/></svg>Generate</a>
+  <a href="#/recent" data-v="recent"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Recent</a>
+  <a href="#/settings" data-v="settings"><svg class="ic" aria-hidden="true"><use href="#i-gear"/></svg>Settings</a>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/security.js"></script>
+<script src="js/generator.js"></script>
+<script src="js/history.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
